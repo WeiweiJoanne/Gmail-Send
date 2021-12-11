@@ -9,7 +9,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser'); // express 4.16之後 棄用
 
 
-
 var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -23,9 +22,27 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+// const expressValidator = require('express-validator');
+// app.use(expressValidator());
+
+
 // routes
 var contact = require('./routes/contact');
+var session = require('express-session');
+var flash = require('connect-flash');
+
+app.use(session({
+  secret: 'mysupercat',
+  resave: true,
+  saveUninitialized: true,
+}))
+
+app.use(flash());
+
 app.use('/contact', contact);
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
