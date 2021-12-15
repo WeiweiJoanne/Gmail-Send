@@ -22,7 +22,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-
 // const expressValidator = require('express-validator');
 // app.use(expressValidator());
 
@@ -30,7 +29,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // routes
 var contact = require('./routes/contact');
 var session = require('express-session');
-var flash = require('connect-flash');
+// var flash = require('connect-flash');
 
 app.use(session({
   secret: 'mysupercat',
@@ -38,7 +37,7 @@ app.use(session({
   saveUninitialized: true,
 }))
 
-app.use(flash());
+// app.use(flash());
 
 app.use('/contact', contact);
 

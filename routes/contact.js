@@ -1,7 +1,12 @@
 
 var express = require('express');
-var app = express();
 var router = express.Router();
+var flash = require('connect-flash');
+
+const expressValidator = require('express-validator');
+
+router.use(expressValidator());
+router.use(flash());
 
 
 require('dotenv').config()
@@ -11,12 +16,11 @@ var nodemailer = require('nodemailer');
 var csrf = require('csurf')
 var csrfProtection = csrf({ cookie: true })
 
-const expressValidator = require('express-validator');
-app.use(expressValidator());
+
 
 router.get('/', csrfProtection,function (req, res) {
     console.log(process.env.gmailAccessToken);
-    res.render('contact', { csrfToken: req.csrfToken(), nameErr: req.flash('nameErr')});
+    res.render('contact', { csrfToken: req.csrfToken(), errors: req.flash('errors')});
 });
 router.get('/review', function (req, res) {
     res.render('contactReview');
@@ -25,16 +29,21 @@ router.get('/review', function (req, res) {
 
 router.post('/post', csrfProtection ,function (req, res) {
     var data = req.body;
-    req.checkBody('username').isLength({ min: 1 });
+    req.checkBody('username').notEmpty().trim().withMessage('name is not blank');
+    req.checkBody('title', 'title is required').notEmpty().trim();
+    req.checkBody('description', 'description is required').notEmpty().trim();
+    req.checkBody('email', 'email is required').isEmail().normalizeEmail();
 
     const validationResults = req.validationErrors();
-    console.info(`validation results: ${JSON.stringify(validationResults)}`);
+    // console.info(`validation results: ${JSON.stringify(validationResults)}`);
 
     if (!validationResults || validationResults.length < 1) {
         req.sanitizeBody('username').escape().trim();
-        res.send(`checking done, hello: ${req.body['username']}`);
+        res.send(`checking done, hello: ${JSON.stringify(req.body)}`);
     } else {
-        res.send(`checking done, error: ${JSON.stringify(validationResults)}`);
+        // res.send(`checking done, error: ${JSON.stringify(validationResults)}`);
+        req.flash('errors', validationResults)
+        res.redirect('/contact')
     }
 
 
